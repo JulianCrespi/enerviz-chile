@@ -1,0 +1,21 @@
+name: fetch-prices
+on:
+  schedule:
+    - cron: "5 * * * *"  # minute 5 of every hour
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - name: deps
+        run: pip install pandas requests pytz
+      - name: fetch
+        run: python scripts/fetch_prices.py
+      - name: commit
+        run: |
+          git config user.name github-actions
+          git config user.email github@none
+          git add public/prices_sample.json
+          git commit -m "chore: hourly price refresh" || echo "no changes"
+          git push 
